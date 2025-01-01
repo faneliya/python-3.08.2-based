@@ -54,12 +54,13 @@ ConfigArgParse==1.7
 contourpy==1.1.1
 cornac==1.18.0
 coverage==7.6.1
+crud==0.1
 cryptography==43.0.3
 cycler==0.12.1
 cymem==2.0.10
 cytoolz==0.9.0.1
 dbus-python==1.2.16
-debugpy==1.8.9
+debugpy==1.8.11
 decorator==5.1.1
 defusedxml==0.7.1
 dill==0.2.9
@@ -279,6 +280,7 @@ propcache==0.2.0
 proto-plus==1.25.0
 protobuf==4.25.5
 psutil==6.1.0
+psycopg2==2.9.10
 ptyprocess==0.7.0
 pure-eval==0.2.3
 pure-sasl==0.6.2

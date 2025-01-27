@@ -2,6 +2,16 @@ FROM ubuntu:focal-20241011 AS backend-compat-build
 WORKDIR /
 # default working shell
 SHELL ["/bin/bash", "-e", "-o", "pipefail", "-c"]
+#SHELL ["/bin/bash"]
+
+# RUN apt update -y
+
+RUN apt-get update && apt-get install -y locales
+RUN rm -rf /var/lib/apt/lists/*
+RUN apt-get -y install language-support-fonts-ko language-support-input-ko
+RUN localedef -f UTF-8 -i ko_KR ko_KR.UTF-8
+
+ENV LANG ko_KR.utf8
 
 # default python3 - 
 RUN mkdir /app && \
@@ -715,6 +725,25 @@ RUN apt install -y --no-install-recommends  \
 RUN apt-get install libgirepository1.0-dev sudo
 
 COPY requirements.txt /app/etc
+
+COPY mecab-0.996-ko-0.9.2.tar.gz /app/code
+COPY mecab-ko-dic-2.1.1-20180720.tar.gz /app/code
+
+WORKDIR /app/code/
+
+RUN tar -xzf /app/code/mecab-0.996-ko-0.9.2.tar.gz
+RUN tar -xzf /app/code/mecab-ko-dic-2.1.1-20180720.tar.gz
+
+WORKDIR /app/code/mecab-0.996-ko-0.9.2
+RUN ./configure
+RUN make install
+
+WORKDIR /app/code/mecab-ko-dic-2.1.1-20180720
+RUN ./configure
+RUN ldconfig
+RUN make install
+
+WORKDIR /
 # COPY hac-fe.tar /app/code
 
 
@@ -722,11 +751,6 @@ RUN pip3 install recommenders==1.2.0
 RUN pip3 install jupyter
 # tensorflow torch pymanopt
 
-WORKDIR /app/code
-# RUN tar -xvf hac-fe.tar
-RUN git clone https://github.com/recommenders-team/recommenders.git
-
-WORKDIR /
 # clear package conflict before pip installation
 # RUN python3 -m pip config set global.break-system-packages true
 
@@ -739,6 +763,11 @@ RUN pip3 install setuptools==66.1.1
 # RUN pip3 install -r /app/etc/conflicts.txt
 
 RUN ln -s /usr/bin/python3 /usr/bin/python
+
+
+# RUN tar -xvf hac-fe.tar
+# RUN git clone https://github.com/recommenders-team/recommenders.git
+WORKDIR /
 
 RUN groupadd -g 9000 dev && \
     mkdir /home/dev-fastapi && \
@@ -763,7 +792,7 @@ RUN echo "dev:kepco123456/" | chpasswd &&\
     echo "dev-django:kepco123456/" | chpasswd &&\
     echo "dev-react:kepco123456/" | chpasswd
  
-EXPOSE 22 3000 8000 8040 8080 8090 
+EXPOSE 22 80 3000 8000 8040 8080 8090 
 
 RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 # ubuntu:noble docker version directory missing bug must be fixed below 

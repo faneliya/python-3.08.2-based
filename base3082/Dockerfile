@@ -1,4 +1,5 @@
-FROM ubuntu:focal-20241011 AS backend-compat-build
+#FROM ubuntu:focal-20241011 AS backend-compat-build
+FROM nvidia/cuda:12.8.0-cudnn-devel-ubuntu20.04 AS gpu-support-dev
 WORKDIR /
 # default working shell
 SHELL ["/bin/bash", "-e", "-o", "pipefail", "-c"]
@@ -6,12 +7,14 @@ SHELL ["/bin/bash", "-e", "-o", "pipefail", "-c"]
 
 # RUN apt update -y
 
-RUN apt-get update && apt-get install -y locales
 RUN rm -rf /var/lib/apt/lists/*
-RUN apt-get -y install language-support-fonts-ko language-support-input-ko
-RUN localedef -f UTF-8 -i ko_KR ko_KR.UTF-8
 
-ENV LANG ko_KR.utf8
+RUN apt-get update -y
+RUN apt-get install -y locales
+RUN apt-get install -y language-pack-ko
+RUN locale-gen ko_KR.EUC-KR
+RUN update-locale LANG=ko_KR.UTF-8 LC_MESSAGES=POSIX
+ENV LANG=ko_KR.UTF-8
 
 # default python3 - 
 RUN mkdir /app && \
